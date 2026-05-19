@@ -1,0 +1,6 @@
+{
+  "name": "Scholar - Engineering Portal",
+  "description": "An advanced academic management system for engineering colleges, featuring heap-sort powered student record organization and exam scheduling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
