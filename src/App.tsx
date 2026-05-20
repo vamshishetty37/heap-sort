@@ -14,6 +14,7 @@ import SummaryModule from './components/SummaryModule';
 import StudentModule from './components/StudentModule';
 import ExamModule from './components/ExamModule';
 import AnalyticsModule from './components/AnalyticsModule';
+import CompilerModule from './components/CompilerModule';
 import CollegeLogo from './components/CollegeLogo';
 import { Bell, Search, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -31,6 +32,8 @@ export default function App() {
         return <ExamModule />;
       case 'analytics':
         return <AnalyticsModule />;
+      case 'compiler':
+        return <CompilerModule />;
       default:
         return <SummaryModule />;
     }

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { LayoutDashboard, Users, Calendar, BarChart3, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, BarChart3, Terminal, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
 import CollegeLogo from './CollegeLogo';
 
@@ -19,6 +19,7 @@ export default function Sidebar({ currentTab, setTab }: SidebarProps) {
     { id: 'students', label: 'Student Records', icon: Users },
     { id: 'exams', label: 'Exam Schedule', icon: Calendar },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'compiler', label: 'Max-Heap Sandbox', icon: Terminal },
   ];
 
   return (
