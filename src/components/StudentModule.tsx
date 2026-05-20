@@ -15,9 +15,24 @@ export default function StudentModule() {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<SortField>('usn');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedSortField, setSelectedSortField] = useState<SortField>('usn');
+  const [selectedSortOrder, setSelectedSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isSorting, setIsSorting] = useState(false);
+  const [lastSortTime, setLastSortTime] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'records' | 'registration'>('records');
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{ usn?: string; cgpa?: string; name?: string }>({});
+
+  const handleOpenAddModal = () => {
+    setFormErrors({});
+    setShowAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setFormErrors({});
+    setShowAddModal(false);
+  };
 
   const selectedStudent = useMemo(() => 
     students.find(s => s.id === selectedStudentId), 
@@ -26,12 +41,28 @@ export default function StudentModule() {
 
   // Filter and then sort using Heap Sort
   const processedStudents = useMemo(() => {
-    let filtered = students.filter(s => 
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.usn.toLowerCase().includes(search.toLowerCase()) ||
-      s.branch.toLowerCase().includes(search.toLowerCase())
-    );
+    let filtered = students.filter(s => {
+      const branchName = BRANCHES.find(b => b.code.toUpperCase() === s.branch.toUpperCase())?.name || '';
+      return s.name.toLowerCase().includes(search.toLowerCase()) ||
+             s.usn.toLowerCase().includes(search.toLowerCase()) ||
+             s.branch.toLowerCase().includes(search.toLowerCase()) ||
+             branchName.toLowerCase().includes(search.toLowerCase());
+    });
 
+    // ==========================================
+    // HEAP SORT PROCESS (O(N log N) COMPLEXITY)
+    // ==========================================
+    // 1. BUILD MAX HEAP:
+    //    Initially converts the raw array into a max heap key-value storage representation
+    //    where the parent node value is larger than or equal to its child node values.
+    // 2. HEAPIFY:
+    //    The core heapify() operation maintains the heap invariant. If a child node is larger
+    //    than its parent, they are rearranged to float the higher values upwards.
+    // 3. SWAP OPERATION:
+    //    Repeatedly exchanges the maximum root node with the last active leaf node, and reduces
+    //    the heap boundaries so that values settle into the sorted positions.
+    // 4. FINAL SORTED OUTPUT:
+    //    Once all items are extracted, the array contains the complete sorted sequences.
     const sorted = heapSort(filtered, (a, b) => {
       let valA = a[sortField as keyof Student];
       let valB = b[sortField as keyof Student];
@@ -50,12 +81,36 @@ export default function StudentModule() {
   }, [students, search, sortField, sortOrder]);
 
   const toggleSort = (field: SortField) => {
+    let nextOrder: 'asc' | 'desc' = 'asc';
     if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
+      nextOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     }
+    
+    setSortField(field);
+    setSortOrder(nextOrder);
+    setSelectedSortField(field);
+    setSelectedSortOrder(nextOrder);
+    setLastSortTime(Date.now());
+  };
+
+  const handleApplyHeapSort = () => {
+    setIsSorting(true);
+    setTimeout(() => {
+      // Toggle logic centered on CGPA Score:
+      // First click: descending order (highest CGPA first)
+      // Second click: ascending order (lowest CGPA first)
+      let nextOrder: 'asc' | 'desc' = 'desc';
+      if (sortField === 'cgpa') {
+        nextOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+      }
+      
+      setSortField('cgpa');
+      setSortOrder(nextOrder);
+      setSelectedSortField('cgpa');
+      setSelectedSortOrder(nextOrder);
+      setLastSortTime(Date.now());
+      setIsSorting(false);
+    }, 300);
   };
 
   return (
@@ -82,7 +137,7 @@ export default function StudentModule() {
           </div>
           <button 
             id="btn-add-student"
-            onClick={() => setShowAddModal(true)}
+            onClick={handleOpenAddModal}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-all shadow-sm font-semibold text-sm"
           >
             <Plus className="w-4 h-4" />
@@ -93,50 +148,112 @@ export default function StudentModule() {
 
       {activeTab === 'records' ? (
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full sm:w-96">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="text"
                 placeholder="Query by USN, Name or Department..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
               />
             </div>
-            <button className="bg-slate-800 text-white text-xs px-4 py-2 rounded-md hover:bg-slate-900 transition-colors font-bold uppercase tracking-wider">
-              Apply Heap Sort
-            </button>
+            
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end font-sans">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Field:</span>
+                <select 
+                  value={selectedSortField}
+                  onChange={(e) => setSelectedSortField(e.target.value as SortField)}
+                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="usn">USN (Identity)</option>
+                  <option value="name">Legal Name</option>
+                  <option value="semester">Cycle (Semester)</option>
+                  <option value="cgpa">CGPA Score</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Order:</span>
+                <select 
+                  value={selectedSortOrder}
+                  onChange={(e) => setSelectedSortOrder(e.target.value as 'asc' | 'desc')}
+                  className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+
+              <button 
+                onClick={handleApplyHeapSort}
+                disabled={isSorting}
+                className="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2 rounded-md transition-all font-bold uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50 select-none cursor-pointer"
+              >
+                {isSorting ? (
+                  <>
+                    <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Sorting...
+                  </>
+                ) : (
+                  'Apply Heap Sort'
+                )}
+              </button>
+            </div>
           </div>
+
+          {lastSortTime && (
+            <div className="px-5 py-2 border-b border-slate-100 bg-blue-50/40 flex items-center justify-between text-xs text-blue-700 font-bold font-mono animate-fade-in">
+              <span className="flex items-center gap-1.5 font-sans">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                Heap Sort Applied Successfully
+              </span>
+              <span>Sorted by: {sortField.toUpperCase()} ({sortOrder.toUpperCase()})</span>
+            </div>
+          )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-[11px] font-bold uppercase text-slate-500 tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-100 text-[11px] font-bold uppercase text-slate-500 tracking-wider border-b border-slate-200 select-none">
                   <th 
-                    className="px-6 py-4 cursor-pointer hover:text-blue-600 transition-colors"
+                    className={`px-6 py-4 cursor-pointer hover:text-blue-600 transition-all ${sortField === 'usn' ? 'text-blue-700 bg-blue-50/40 font-extrabold' : 'text-slate-500'}`}
                     onClick={() => toggleSort('usn')}
                   >
-                    <div className="flex items-center gap-2 uppercase">USN (Identity) <ArrowUpDown className="w-3 h-3 text-slate-300" /></div>
+                    <div className="flex items-center gap-2 uppercase">
+                      USN (Identity) 
+                      <ArrowUpDown className={`w-3 h-3 transition-colors ${sortField === 'usn' ? 'text-blue-600' : 'text-slate-300'}`} />
+                    </div>
                   </th>
                   <th 
-                    className="px-6 py-4 cursor-pointer hover:text-blue-600 transition-colors"
+                    className={`px-6 py-4 cursor-pointer hover:text-blue-600 transition-all ${sortField === 'name' ? 'text-blue-700 bg-blue-50/40 font-extrabold' : 'text-slate-500'}`}
                     onClick={() => toggleSort('name')}
                   >
-                     <div className="flex items-center gap-2 uppercase">Legal Name <ArrowUpDown className="w-3 h-3 text-slate-300" /></div>
+                     <div className="flex items-center gap-2 uppercase">
+                       Legal Name 
+                       <ArrowUpDown className={`w-3 h-3 transition-colors ${sortField === 'name' ? 'text-blue-600' : 'text-slate-300'}`} />
+                     </div>
                   </th>
-                  <th className="px-6 py-4 uppercase">Department</th>
+                  <th className="px-6 py-4 uppercase text-slate-500">Department</th>
                   <th 
-                    className="px-6 py-4 cursor-pointer hover:text-blue-600 transition-colors"
+                    className={`px-6 py-4 cursor-pointer hover:text-blue-600 transition-all ${sortField === 'semester' ? 'text-blue-700 bg-blue-50/40 font-extrabold' : 'text-slate-500'}`}
                     onClick={() => toggleSort('semester')}
                   >
-                    <div className="flex items-center gap-2 uppercase">Cycle <ArrowUpDown className="w-3 h-3 text-slate-300" /></div>
+                    <div className="flex items-center gap-2 uppercase">
+                      Cycle 
+                      <ArrowUpDown className={`w-3 h-3 transition-colors ${sortField === 'semester' ? 'text-blue-600' : 'text-slate-300'}`} />
+                    </div>
                   </th>
                   <th 
-                    className="px-6 py-4 cursor-pointer hover:text-blue-600 transition-colors"
+                    className={`px-6 py-4 cursor-pointer hover:text-blue-600 transition-all ${sortField === 'cgpa' ? 'text-blue-700 bg-blue-50/40 font-extrabold' : 'text-slate-500'}`}
                     onClick={() => toggleSort('cgpa')}
                   >
-                    <div className="flex items-center gap-2 uppercase">CGPA Score <ArrowUpDown className="w-3 h-3 text-slate-300" /></div>
+                    <div className="flex items-center gap-2 uppercase">
+                      CGPA Score 
+                      <ArrowUpDown className={`w-3 h-3 transition-colors ${sortField === 'cgpa' ? 'text-blue-600' : 'text-slate-300'}`} />
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -319,21 +436,53 @@ export default function StudentModule() {
               className="bg-white border border-slate-200 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden"
             >
               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 className="text-xl font-bold text-slate-800 tracking-tight">University Enrollment</h3>
-                <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-2xl">&times;</button>
+                <h3 className="text-xl font-bold text-slate-800 tracking-tight">Impact College Enrollment</h3>
+                <button onClick={handleCloseAddModal} className="text-slate-400 hover:text-slate-600 transition-colors text-2xl">&times;</button>
               </div>
               <form 
+                noValidate
                 onSubmit={(e) => {
                   e.preventDefault();
                   const form = e.target as HTMLFormElement;
                   const formData = new FormData(form);
+                  
+                  // Extract and clean values to automatically support lowercase & spaces gracefully
+                  const rawUsn = (formData.get('usn') as string || '').replace(/\s+/g, '').toUpperCase();
+                  const rawName = (formData.get('name') as string || '').trim();
+                  const cgpaStr = (formData.get('cgpa') as string || '').trim();
+                  const cgpaValue = Number(cgpaStr);
+                  
+                  const errors: { usn?: string; cgpa?: string; name?: string } = {};
+                  
+                  // USN validation regex matches standard formats like 1BM20ME088, 4SU21CS001, 1IC24CY005
+                  const usnRegex = /^[1-4][A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{3}$/;
+                  if (!rawUsn || !usnRegex.test(rawUsn)) {
+                    errors.usn = "Invalid USN format";
+                  }
+                  
+                  // Allow names with spaces: ensure name isn't completely empty
+                  if (!rawName) {
+                    errors.name = "Full Legal Name is required";
+                  }
+                  
+                  // CGPA must be a valid float/decimal between 0.0 and 10.0
+                  if (cgpaStr === '' || isNaN(cgpaValue) || cgpaValue < 0 || cgpaValue > 10) {
+                    errors.cgpa = "CGPA must be between 0 and 10";
+                  }
+                  
+                  if (Object.keys(errors).length > 0) {
+                    setFormErrors(errors);
+                    return;
+                  }
+                  
+                  setFormErrors({});
                   const newStudent: Student = {
                     id: Math.random().toString(36).substring(2, 9),
-                    usn: formData.get('usn') as string,
-                    name: formData.get('name') as string,
+                    usn: rawUsn,
+                    name: rawName,
                     branch: formData.get('branch') as string,
                     semester: Number(formData.get('semester')),
-                    cgpa: Number(formData.get('cgpa')),
+                    cgpa: cgpaValue,
                     registeredCourses: []
                   };
                   setStudents([...students, newStudent]);
@@ -342,13 +491,23 @@ export default function StudentModule() {
                 className="p-8 space-y-5"
               >
                 <div className="grid grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1">University USN</label>
-                    <input name="usn" required pattern="^[1-4][A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{3}$" placeholder="1RV21CS001" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-mono" />
+                  <div className="space-y-1.5 flex flex-col justify-start">
+                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1 mr-auto flex">Impact College USN</label>
+                    <input 
+                      name="usn" 
+                      placeholder="1RV21CS001" 
+                      className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-mono ${formErrors.usn ? 'border-red-400 focus:border-red-500' : 'border-slate-200'}`} 
+                    />
+                    {formErrors.usn && <span className="text-red-500 text-[11px] font-semibold mt-1 px-1">{formErrors.usn}</span>}
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1">Full Legal Name</label>
-                    <input name="name" required placeholder="John Doe" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold" />
+                  <div className="space-y-1.5 flex flex-col justify-start">
+                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1 mr-auto flex">Full Legal Name</label>
+                    <input 
+                      name="name" 
+                      placeholder="John Doe" 
+                      className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-semibold ${formErrors.name ? 'border-red-400 focus:border-red-500' : 'border-slate-200'}`} 
+                    />
+                    {formErrors.name && <span className="text-red-500 text-[11px] font-semibold mt-1 px-1">{formErrors.name}</span>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-5">
@@ -371,10 +530,17 @@ export default function StudentModule() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest px-1">Cumulative Grade (CGPA)</label>
-                  <input name="cgpa" type="number" step="0.01" min="0" max="10" required placeholder="0.00" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-mono" />
+                  <input 
+                    name="cgpa" 
+                    type="number" 
+                    step="0.01" 
+                    placeholder="0.00" 
+                    className={`w-full bg-slate-50 border rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-mono ${formErrors.cgpa ? 'border-red-400 focus:border-red-500' : 'border-slate-200'}`} 
+                  />
+                  {formErrors.cgpa && <span className="text-red-500 text-[11px] font-semibold mt-1 px-1">{formErrors.cgpa}</span>}
                 </div>
                 <div className="pt-6 flex gap-4">
-                  <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-3 border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 transition-all font-bold text-xs uppercase tracking-widest">Cancel</button>
+                  <button type="button" onClick={handleCloseAddModal} className="flex-1 px-4 py-3 border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 transition-all font-bold text-xs uppercase tracking-widest">Cancel</button>
                   <button type="submit" className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md font-bold text-xs uppercase tracking-widest">Submit Record</button>
                 </div>
               </form>

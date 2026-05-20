@@ -61,7 +61,7 @@ export default function SummaryModule() {
                 { type: 'ID_CREATE', msg: 'New student USN 1RV21CS102 added to registry', time: '2 mins ago' },
                 { type: 'SCHED_MOD', msg: 'Exam schedule for 21CS42 updated successfully', time: '45 mins ago' },
                 { type: 'SYS_REBUILD', msg: 'Heap Sort engine synchronized 42k records', time: '1 hour ago' },
-                { type: 'SECURITY', msg: 'User Dr. Murthy accessed registrar level data', time: '3 hours ago' },
+                { type: 'SECURITY', msg: 'User Prativa Samantaray accessed registrar level data', time: '3 hours ago' },
               ].map((log, i) => (
                 <div key={i} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">

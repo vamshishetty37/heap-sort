@@ -6,6 +6,7 @@
 import React from 'react';
 import { LayoutDashboard, Users, Calendar, BarChart3, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
+import CollegeLogo from './CollegeLogo';
 
 interface SidebarProps {
   currentTab: string;
@@ -22,19 +23,15 @@ export default function Sidebar({ currentTab, setTab }: SidebarProps) {
 
   return (
     <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col h-screen sticky top-0 overflow-hidden shadow-2xl">
-      <div className="p-6 bg-slate-900/50 border-b border-slate-700/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center font-bold text-white text-xl shadow-inner border border-blue-400/20">
-            S
-          </div>
-          <div>
-            <h1 className="font-bold text-slate-100 text-sm uppercase tracking-widest leading-tight">University</h1>
-            <p className="text-slate-500 text-[10px] font-mono uppercase font-bold">Portal v2.4</p>
-          </div>
+      <div className="p-5 bg-slate-900/50 border-b border-slate-700/50 flex flex-col items-center gap-3">
+        <CollegeLogo variant="dark" size="sidebar" className="hover:rotate-3 transition-transform" />
+        <div className="text-center">
+          <h1 className="font-bold text-slate-100 text-sm uppercase tracking-wider leading-tight">Impact College of Engineering</h1>
+          <p className="text-slate-500 text-[10px] font-mono uppercase font-bold mt-1">Portal v2.4-STABLE</p>
         </div>
       </div>
 
-      <div className="px-4 pt-6 pb-2 text-[10px] uppercase tracking-wider font-bold text-slate-500">University Records</div>
+      <div className="px-4 pt-6 pb-2 text-[10px] uppercase tracking-wider font-bold text-slate-500">Impact College Records</div>
       <nav className="flex-1 px-4 py-2 space-y-1">
         {menuItems.map((item) => {
           const isActive = currentTab === item.id;

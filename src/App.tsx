@@ -13,6 +13,8 @@ import Sidebar from './components/Sidebar';
 import SummaryModule from './components/SummaryModule';
 import StudentModule from './components/StudentModule';
 import ExamModule from './components/ExamModule';
+import AnalyticsModule from './components/AnalyticsModule';
+import CollegeLogo from './components/CollegeLogo';
 import { Bell, Search, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -28,17 +30,7 @@ export default function App() {
       case 'exams':
         return <ExamModule />;
       case 'analytics':
-        return (
-          <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800">
-              <span className="text-4xl text-zinc-700">📊</span>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">Advanced Analytics</h3>
-              <p className="text-zinc-500 max-w-xs mx-auto">This module is currently being integrated with VTU centralized data servers.</p>
-            </div>
-          </div>
-        );
+        return <AnalyticsModule />;
       default:
         return <SummaryModule />;
     }
@@ -53,9 +45,9 @@ export default function App() {
       <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden">
         {/* Top Header */}
         <header className="h-16 bg-[#003366] text-white flex items-center justify-between px-8 shrink-0 border-b-4 border-[#FFD700] sticky top-0 z-40 shadow-md">
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-8 bg-white rounded flex items-center justify-center font-bold text-[#003366] text-lg">S</div>
-            <h1 className="text-lg font-semibold tracking-tight">Engineering Management Portal</h1>
+          <div className="flex items-center gap-3">
+            <CollegeLogo variant="dark" size="sm" className="bg-white/10 rounded-lg p-0.5 hover:bg-white/20 transition-all" />
+            <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight">Impact College of Engineering</h1>
           </div>
           
           <div className="flex items-center gap-6">
@@ -76,7 +68,7 @@ export default function App() {
               <div className="h-8 w-px bg-white/10 mx-2" />
               <button className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <div className="text-right flex flex-col justify-center">
-                  <span className="text-xs font-bold text-white block leading-tight">Dr. S. K. Murthy</span>
+                  <span className="text-xs font-bold text-white block leading-tight font-sans">Prativa Samantaray</span>
                   <span className="text-[10px] text-white/60 block uppercase font-mono tracking-tighter">Registrar (Admin)</span>
                 </div>
                 <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
@@ -109,7 +101,7 @@ export default function App() {
               <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Algorithm: </span>
               <span className="text-[10px] font-mono text-blue-700 font-bold uppercase bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">MAX-HEAP (O(n log n))</span>
            </div>
-           <p className="text-[10px] font-mono text-slate-400">© 2024 ENGINEERING MANAGEMENT SYSTEM. VERSION 2.4.1-STABLE</p>
+           <p className="text-[10px] font-mono text-slate-400">© 2026 Impact College of Engineering. Version 2.4.1-STABLE</p>
         </footer>
       </div>
     </div>

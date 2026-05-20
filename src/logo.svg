@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Curved path centered at (100, 73) with radius 44 for holding text clockwise -->
+    <path id="textArc" d="M 59.5,90.2 A 44,44 0 1,1 140.5,90.2" fill="none" />
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Globe & Stand Assembly Group with Branding Color -->
+  <g fill="none" stroke="#003366" stroke-linecap="round" stroke-linejoin="round">
+    
+    <!-- Outer Meridian Scale (Arm holding the globe) -->
+    <path d="M 76.8,17.2 A 60,60 0 0,0 123.2,128.8" stroke-width="3" />
+    <!-- Ticked outer markings on meridian -->
+    <path d="M 74.5,18 A 61,61 0 0,0 125,127.5" stroke-width="0.75" stroke-dasharray="1.5 2" />
+
+    <!-- Polaris Core Pins -->
+    <circle cx="76.8" cy="17.2" r="2" fill="#003366" />
+    <circle cx="123.2" cy="128.8" r="2" fill="#003366" />
+
+    <!-- Stand Stem Support -->
+    <line x1="100" y1="133" x2="100" y2="148" stroke-width="5" />
+    <!-- Joint collar -->
+    <rect x="96" y="133" width="8" height="3" rx="1" fill="#003366" stroke-width="0" />
+
+    <!-- Stepped base dome sitting flat on impact banner -->
+    <path d="M 82,148 Q 100,144 118,148 Z" fill="#003366" stroke-width="1" />
+    <line x1="80" y1="148" x2="120" y2="148" stroke-width="2" />
+
+    <!-- Tilted Globe Body Group (Rotated about Center of Sphere (100, 73) by 23.5 degrees) -->
+    <g transform="rotate(23.5, 100, 73)">
+      <!-- Axis rod through core of globe -->
+      <line x1="100" y1="12" x2="100" y2="134" stroke-width="1.5" stroke-dasharray="8 3 3 3" opacity="0.4" />
+
+      <!-- Outer boundary of Sphere -->
+      <circle cx="100" cy="73" r="50" stroke-width="2.5" />
+      <circle cx="100" cy="73" r="38" stroke-width="1" stroke-dasharray="2 2" opacity="0.7" />
+
+      <!-- Center Longitude Line -->
+      <line x1="100" y1="23" x2="100" y2="123" stroke-width="1.2" />
+      
+      <!-- Longitudinal Curves (Ellipses) -->
+      <ellipse cx="100" cy="73" rx="34" ry="50" stroke-width="1" />
+      <ellipse cx="100" cy="73" rx="18" ry="50" stroke-width="1" />
+
+      <!-- Center Equator line -->
+      <line x1="50" y1="73" x2="150" y2="73" stroke-width="1.5" />
+
+      <!-- Latitudinal Parallels curves -->
+      <path d="M 57.5,50 A 50,25 0 0,1 142.5,50" stroke-width="0.8" />
+      <path d="M 57.5,96 A 50,25 0 0,0 142.5,96" stroke-width="0.8" />
+      <path d="M 68.3,33 A 50,15 0 0,1 131.7,33" stroke-width="0.8" opacity="0.8" />
+      <path d="M 68.3,113 A 50,15 0 0,0 131.7,113" stroke-width="0.8" opacity="0.8" />
+
+      <!-- Stylized network wave/planning line spanning the grid (representing Manpower & Training curves) -->
+      <path d="M 55,80 Q 75,50 100,75 T 145,66" stroke-width="2" stroke-dasharray="1 1" />
+      <path d="M 52,70 Q 82,90 102,60 T 148,80" stroke-width="1.5" opacity="0.8" />
+    </g>
+
+    <!-- Concentric double circle matching the text boundary inside outer sphere -->
+    <circle cx="100" cy="73" r="49.5" stroke-width="0.75" />
+    <circle cx="100" cy="73" r="38" stroke-width="1" />
+
+    <!-- Curved logo text along the inner circular path -->
+    <!-- The text is un-tilted (matches vertical orientation of the globe system) -->
+    <text font-family="system-ui, -apple-system, 'Inter', sans-serif" font-size="5.2" font-weight="900" fill="#003366" letter-spacing="0.14em">
+      <textPath href="#textArc" startOffset="50%" textAnchor="middle">
+        THE INSTITUTE FOR MANPOWER PLANNING AND CAREER TRAINING
+      </textPath>
+    </text>
+
+    <!-- Bottom rectangular banner -->
+    <rect x="12" y="152" width="176" height="32" rx="2" fill="#003366" stroke-width="0" filter="url(#shadow)" />
+
+    <!-- Branding letters "i m p a c t" inside bottom banner -->
+    <text x="100" y="174" font-family="system-ui, -apple-system, 'Inter', sans-serif" font-weight="900" font-size="20" fill="#ffffff" letter-spacing="0.32em" text-anchor="middle">impact</text>
+  </g>
+</svg>
